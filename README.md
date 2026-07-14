@@ -1,74 +1,73 @@
-# AI Biomechanical Pose Correction & Error Pattern Detection
-**Hybrid 1D-CNN + Bidirectional LSTM Neural Network | HTML5 Standalone Web Dashboard**
+# Detección de Patrones de Error Postural en Ejercicios Físicos
+**Arquitectura Híbrida 1D-CNN + BiLSTM en PyTorch | Dashboard Web Autónomo en HTML5**
 
-![Training Curves](training_curves.png)
+![Curvas de Entrenamiento](training_curves.png)
 
 ---
 
-## 1. Project Overview & Composition
-This repository contains an end-to-end deep learning and computer vision system designed to automatically evaluate human exercise technique from video sequences, identify postural errors (spine/back desalignment vs. knee/limb collapse), and generate natural language diagnostic feedback.
+## 1. Descripción del Proyecto y Composición
+Este repositorio contiene un sistema completo de Inteligencia Artificial (Deep Learning y Visión por Computador) diseñado para evaluar automáticamente la calidad de ejecución de ejercicios físicos a partir de secuencias temporales de video, detectar errores posturales (desalineación de espalda/columna vs. inestabilidad en rodillas/extremidades) y generar **retroalimentación textual explicable en español**.
 
-### 📁 Repository Structure
+### 📁 Estructura del Proyecto
 ```text
 AI_Pose_Correction_CNN_LSTM/
 │
-├── dashboard.html             # Standalone HTML5/JS Interactive Dashboard (Visualizes skeletons & MP4 upload)
-├── real_data.js               # Penn Action real sequence frames, 13-joint coordinates & AI predictions
-├── abrir_dashboard.bat        # Windows quick-launcher executable for dashboard.html
-├── main.py                    # Unified CLI entry point for training and evaluation
-├── requirements.txt           # Python package dependencies (PyTorch, NumPy, Matplotlib, Scikit-learn)
-├── training_curves.png        # Publication-grade model training and validation curves
+├── dashboard.html             # Dashboard Interactivo HTML5/JS (Esqueletos 2D y subida de videos MP4)
+├── real_data.js               # Secuencias reales de Penn Action, coordenadas articulares y predicciones IA
+├── abrir_dashboard.bat        # Archivo ejecutable rápido para Windows (abre el dashboard con doble clic)
+├── main.py                    # Punto de entrada unificado por línea de comandos para entrenamiento
+├── requirements.txt           # Dependencias de Python (PyTorch, NumPy, Matplotlib, Scikit-learn)
+├── training_curves.png        # Gráficas de alta resolución de convergencia (Pérdida y Precisión)
 │
-└── src/                       # Modular PyTorch Deep Learning Package
+└── src/                       # Paquete Modular de Inteligencia Artificial en PyTorch
     ├── __init__.py
-    ├── config.py              # Hyperparameters (Features=26, Classes=3, Window=46 frames)
-    ├── dataset.py             # Penn Action DataLoader, Z-score temporal normalization & augmentation
-    ├── model.py               # PoseQualityHybridModel (1D-CNN Spatial Extractor + BiLSTM Temporal Layer)
-    ├── train.py               # Training loop with Adam optimizer, L2 Weight Decay & Early Stopping
-    ├── feedback.py            # Natural Language Generation (NLG) engine for explainable AI feedback
-    └── visualize_demo.py      # Video generation utility for presentation demos
+    ├── config.py              # Hiperparámetros del sistema (Características=26, Clases=3, Ventana=46 frames)
+    ├── dataset.py             # Cargador de datos (DataLoader), normalización Z-score y aumento de datos
+    ├── model.py               # Arquitectura PoseQualityHybridModel (1D-CNN Espacial + BiLSTM Temporal)
+    ├── train.py               # Bucle de entrenamiento con optimizador Adam, regularización y Early Stopping
+    ├── feedback.py            # Motor de Generación de Lenguaje Natural (NLG) para explicaciones clínicas
+    └── visualize_demo.py      # Generador visual de secuencias de demostración
 ```
 
 ---
 
-## 2. Dataset Attribution & Source
-The real human exercise kinematics and visual sequences processed in this project are derived from the official **Penn Action Dataset**, a benchmark video dataset annotated with 13 anatomical keypoints per frame across real-world physical actions.
+## 2. Origen de la Base de Datos (Dataset Attribution)
+Las secuencias visuales y cinemáticas corporales procesadas por nuestro modelo provienen oficialmente del **Penn Action Dataset**, una base de datos abierta de referencia en visión computacional anotada fotograma a fotograma con coordenadas anatómicas precisas.
 
-* **Official Dataset Repository & Reference:**  
-  [Penn Action Dataset Official Page](https://dreamdragon.github.io/PennAction/?spm=a2ty_o01.29997173.0.0.5ed555fbfff7Af)
+* **Página Oficial y Enlace de Descarga de la Base de Datos:**  
+  [Penn Action Dataset — Repositorio Oficial](https://dreamdragon.github.io/PennAction/?spm=a2ty_o01.29997173.0.0.5ed555fbfff7Af)
 
-* **Keypoint Annotations Used:**  
-  Each sequence tracks $(x, y)$ frame-by-frame coordinates for **13 anatomical joints**: Head, Shoulders, Elbows, Wrists, Hips, Knees, and Ankles across 15 sports and gym exercise categories (Squat, Pushup, Bench Press, Situp, Clean & Jerk, etc.).
-
----
-
-## 3. Deep Learning Architecture (`src/model.py`)
-Our neural network processes continuous time-series input vectors $\mathbf{X} \in \mathbb{R}^{B \times 26 \times 46}$ ($26$ normalized joint coordinates across $46$ frames):
-
-1. **Spatial Convolutional Block (`1D-CNN`)**:
-   - Two `nn.Conv1d` layers extract local spatial relationships, implicit angular velocities, and inter-joint coordination features.
-   - Regularized via `BatchNorm1d` and `Dropout(0.3)`.
-2. **Temporal Recurrent Block (`BiLSTM`)**:
-   - A Bidirectional LSTM layer models long-range sequential dependencies across the full exercise execution cycle (eccentric descent $\to$ concentric ascent).
-3. **Probabilistic Classifier & NLG**:
-   - Projects hidden states to 3 posture quality classes (**Class 0:** Correct Posture, **Class 1:** Back/Spine Error, **Class 2:** Limb/Knee Error) and automatically emits natural language feedback explaining technical corrections.
+* **Detalle de las Anotaciones:**  
+  Cada secuencia registra las coordenadas $(x, y)$ a lo largo de los fotogramas para **13 articulaciones anatómicas clave**: Cabeza, Hombros, Codos, Muñecas, Caderas, Rodillas y Tobillos, abarcando 15 disciplinas deportivas y ejercicios de acondicionamiento físico (Sentadilla/Squat, Flexiones/Pushup, Press de Banca/Bench Press, Abdominales/Situp, Halterofilia/Clean & Jerk, entre otros).
 
 ---
 
-## 4. Getting Started
+## 3. Arquitectura del Modelo (`src/model.py`)
+La red neuronal procesa matrices espaciotemporales continuas $\mathbf{X} \in \mathbb{R}^{B \times 26 \times 46}$ ($26$ coordenadas articulares normalizadas a lo largo de $46$ fotogramas):
 
-### Launching the Interactive Web Dashboard
-No server or Python backend is required to inspect the real sequences and evaluate custom videos:
-- Double-click **`abrir_dashboard.bat`** or open **`dashboard.html`** directly in any web browser.
-- **Custom MP4 Evaluation:** Click the **`📹 EVALUAR MI PROPIO VIDEO (MP4)`** button inside the sidebar to upload and inspect any personal exercise video in real-time.
+1. **Bloque Convolucional Espacial (`1D-CNN`)**:
+   - Dos capas `nn.Conv1d` extraen correlaciones espaciales locales, velocidades angulares implícitas y patrones de co-activación entre articulaciones adyacentes.
+   - Regularizado con `BatchNorm1d` y `Dropout(0.3)`.
+2. **Bloque Recurrente Temporal (`BiLSTM`)**:
+   - Una capa LSTM Bidireccional modela las dependencias temporales de largo alcance a lo largo del ciclo completo de ejecución del ejercicio (fase excéntrica de bajada $\to$ fase concéntrica de subida).
+3. **Clasificador Probabilístico y Generación de Retroalimentación**:
+   - Proyecta los estados latentes hacia 3 clases posturales (**Clase 0:** Postura Correcta, **Clase 1:** Alerta de Espalda/Tronco, **Clase 2:** Alerta de Rodillas/Extremidades) y emite automáticamente la explicación diagnóstica en lenguaje natural.
 
-### Training the PyTorch Model
-To train the hybrid model from scratch using the optimized hyperparameters (`lr=5e-4`, `weight_decay=5e-4`, `dropout=0.3`):
+---
+
+## 4. Instrucciones de Ejecución
+
+### Abrir el Dashboard Web Interactivo
+No se requiere instalar ningún servidor ni dependencias de Python para visualizar el panel web:
+- Haz doble clic en **`abrir_dashboard.bat`** o abre el archivo **`dashboard.html`** en cualquier navegador web moderno (Google Chrome, Microsoft Edge, Firefox).
+- **Subida de Videos MP4 Propios:** Haz clic en el botón **`📹 EVALUAR MI PROPIO VIDEO (MP4)`** en el panel lateral para cargar y evaluar de inmediato tu propio video personal.
+
+### Entrenar el Modelo Neuronal en PyTorch
+Para entrenar la red híbrida desde cero utilizando los hiperparámetros optimizados (`lr=5e-4`, `weight_decay=5e-4`, `dropout=0.3`):
 
 ```bash
-# 1. Install dependencies
+# 1. Instalar dependencias del proyecto
 pip install -r requirements.txt
 
-# 2. Run model training with Early Stopping
+# 2. Ejecutar entrenamiento con Parada Temprana (Early Stopping)
 python main.py --mode train --epochs 35 --batch_size 32
-```
